@@ -10,6 +10,8 @@ build_requires:
   Test::Output: 0.12
 configure_requires:
   ExtUtils::MakeMaker: 6.42
+  File::Find::Rule: 0
+  File::Find::Rule::Perl: 1.09
 distribution_type: module
 generated_by: 'Module::Install version 0.91'
 license: perl
@@ -26,7 +28,7 @@ no_index:
 provides:
   CatalystX::Declare:
     file: lib/CatalystX/Declare.pm
-    version: 0.002
+    version: 0.003
   CatalystX::Declare::Keyword::Action:
     file: lib/CatalystX/Declare/Keyword/Action.pm
   CatalystX::Declare::Keyword::Application:
@@ -56,4 +58,4 @@ resources:
   bugtracker: http://github.com/phaylon/catalystx-declarative/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/phaylon/catalystx-declarative/tree/master
-version: 0.002
+version: 0.003
