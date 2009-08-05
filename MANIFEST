@@ -2,9 +2,11 @@
 Changes
 examples/MyApp-Web/Changes
 examples/MyApp-Web/lib/MyApp/Web.pm
+examples/MyApp-Web/lib/MyApp/Web/Controller/Calc.pm
 examples/MyApp-Web/lib/MyApp/Web/Controller/Foo.pm
 examples/MyApp-Web/lib/MyApp/Web/Controller/Root.pm
 examples/MyApp-Web/lib/MyApp/Web/ControllerRole/RenderView.pm
+examples/MyApp-Web/lib/MyApp/Web/Model/Calc.pm
 examples/MyApp-Web/lib/MyApp/Web/View/Hello.pm
 examples/MyApp-Web/Makefile.PL
 examples/MyApp-Web/myapp_web.conf
@@ -25,6 +27,7 @@ examples/MyApp-Web/script/myapp_web_fastcgi.pl
 examples/MyApp-Web/script/myapp_web_server.pl
 examples/MyApp-Web/script/myapp_web_test.pl
 examples/MyApp-Web/t/01app.t
+examples/MyApp-Web/t/02functionality.t
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
 inc/Module/Install/AutoManifest.pm
@@ -46,8 +49,11 @@ lib/CatalystX/Declare/Controller/RegisterActionRoles.pm
 lib/CatalystX/Declare/DefaultSuperclassing.pm
 lib/CatalystX/Declare/Keyword/Action.pm
 lib/CatalystX/Declare/Keyword/Application.pm
+lib/CatalystX/Declare/Keyword/Component.pm
 lib/CatalystX/Declare/Keyword/Controller.pm
+lib/CatalystX/Declare/Keyword/Model.pm
 lib/CatalystX/Declare/Keyword/Role.pm
+lib/CatalystX/Declare/Keyword/View.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
@@ -57,17 +63,24 @@ t/020_controller_roles.t
 t/030_controllers.t
 t/050_controller_composition.t
 t/060_exception_handling.t
+t/070_views.t
+t/080_models.t
 t/100_complex.t
 t/lib/Catalyst/Plugin/CatalystX/Declare/TestPlugin.pm
 t/lib/TestApp.pm
 t/lib/TestApp/Controller/Composed.pm
 t/lib/TestApp/Controller/Errors.pm
 t/lib/TestApp/Controller/Foo.pm
+t/lib/TestApp/Controller/ModelTest.pm
 t/lib/TestApp/Controller/Root.pm
 t/lib/TestApp/Controller/SubclassingErrors.pm
 t/lib/TestApp/Controller/TestController.pm
+t/lib/TestApp/Controller/ViewTest.pm
+t/lib/TestApp/Model/TestModel.pm
 t/lib/TestApp/TestRole.pm
 t/lib/TestApp/Types.pm
+t/lib/TestApp/View/TestView.pm
+t/lib/TestApp/ViewRole/TestRole.pm
 Todo
 xt/kwalitee.t
 xt/pod.t

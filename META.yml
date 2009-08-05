@@ -9,9 +9,12 @@ build_requires:
   Test::More: 0.92
   Test::Output: 0.12
 configure_requires:
+  ExtUtils::MM_Unix: 6.50
   ExtUtils::MakeMaker: 6.42
-  File::Find::Rule: 0
+  File::Find::Rule: 0.30
   File::Find::Rule::Perl: 1.09
+  File::Temp: 0.21
+  PPI: 1.203
 distribution_type: module
 generated_by: 'Module::Install version 0.91'
 license: perl
@@ -27,16 +30,22 @@ no_index:
     - xt
 provides:
   CatalystX::Declare:
-    file: lib/CatalystX/Declare.pm
-    version: 0.003
+    file: blib/lib/CatalystX/Declare.pm
+    version: 0.004
   CatalystX::Declare::Keyword::Action:
-    file: lib/CatalystX/Declare/Keyword/Action.pm
+    file: blib/lib/CatalystX/Declare/Keyword/Action.pm
   CatalystX::Declare::Keyword::Application:
-    file: lib/CatalystX/Declare/Keyword/Application.pm
+    file: blib/lib/CatalystX/Declare/Keyword/Application.pm
+  CatalystX::Declare::Keyword::Component:
+    file: blib/lib/CatalystX/Declare/Keyword/Component.pm
   CatalystX::Declare::Keyword::Controller:
-    file: lib/CatalystX/Declare/Keyword/Controller.pm
+    file: blib/lib/CatalystX/Declare/Keyword/Controller.pm
+  CatalystX::Declare::Keyword::Model:
+    file: blib/lib/CatalystX/Declare/Keyword/Model.pm
   CatalystX::Declare::Keyword::Role:
-    file: lib/CatalystX/Declare/Keyword/Role.pm
+    file: blib/lib/CatalystX/Declare/Keyword/Role.pm
+  CatalystX::Declare::Keyword::View:
+    file: blib/lib/CatalystX/Declare/Keyword/View.pm
 requires:
   CLASS: 1.00
   Carp: 1.08
@@ -58,4 +67,4 @@ resources:
   bugtracker: http://github.com/phaylon/catalystx-declarative/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/phaylon/catalystx-declarative/tree/master
-version: 0.003
+version: 0.004
