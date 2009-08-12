@@ -9,7 +9,7 @@ use Module::Install::Base;
 BEGIN {
   our @ISA = qw(Module::Install::Base);
   our $ISCORE  = 1;
-  our $VERSION = '0.000001';
+  our $VERSION = '0.000001_99';
 }
 
 sub _get_no_index {
@@ -34,13 +34,13 @@ sub _get_dir {
 sub auto_provides_class {
   my ($self) = @_;
 
+  return $self unless $self->is_admin;
+
   require File::Find::Rule;
   require File::Find::Rule::Perl;
   require PPI;
   require File::Temp;
   require ExtUtils::MM_Unix;
-
-  return $self unless $self->is_admin;
 
   my $no_index = $self->_get_no_index;
 
@@ -50,7 +50,7 @@ sub auto_provides_class {
   my @files = $rule->no_index({
       directory => [ map { "$dir/$_" } @{$no_index->{directory} || []} ],
       file => [ map { "$dir/$_" } @{$no_index->{file} || []} ],
-  })->perl_module
+  } )->perl_module
      ->in($dir);
 
   for (@files) {
