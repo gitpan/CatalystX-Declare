@@ -10,9 +10,9 @@ class CatalystX::Declare extends MooseX::Declare is dirty {
 
     clean;
 
-    our $VERSION = '0.005';
+    our $VERSION = '0.006';
 
-    around keywords {
+    around keywords (ClassName $self:) {
         $self->$orig,
         ControllerKeyword->new(     identifier => 'controller'      ),
         RoleKeyword->new(           identifier => 'controller_role' ),
