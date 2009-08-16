@@ -26,7 +26,7 @@ no_index:
 provides:
   CatalystX::Declare:
     file: lib/CatalystX/Declare.pm
-    version: 0.006
+    version: 0.007
   CatalystX::Declare::Keyword::Action:
     file: lib/CatalystX/Declare/Keyword/Action.pm
   CatalystX::Declare::Keyword::Application:
@@ -63,4 +63,4 @@ resources:
   bugtracker: http://github.com/phaylon/catalystx-declarative/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/phaylon/catalystx-declarative/tree/master
-version: 0.006
+version: 0.007
