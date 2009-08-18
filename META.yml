@@ -26,7 +26,7 @@ no_index:
 provides:
   CatalystX::Declare:
     file: lib/CatalystX/Declare.pm
-    version: 0.007
+    version: 0.008
   CatalystX::Declare::Keyword::Action:
     file: lib/CatalystX/Declare/Keyword/Action.pm
   CatalystX::Declare::Keyword::Application:
@@ -51,10 +51,10 @@ requires:
   FindBin: 0
   Moose: 0.89
   MooseX::AttributeHelpers: 0.16
-  MooseX::Declare: 0.24
-  MooseX::Method::Signatures: 0.16
+  MooseX::Declare: 0.26
+  MooseX::Method::Signatures: 0.20
   MooseX::MethodAttributes: 0.15
-  MooseX::Types: 0.16
+  MooseX::Types: 0.17
   Perl6::Junction: 1.40000
   TryCatch: 1.001001
   aliased: 0.22
@@ -63,4 +63,4 @@ resources:
   bugtracker: http://github.com/phaylon/catalystx-declarative/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/phaylon/catalystx-declarative/tree/master
-version: 0.007
+version: 0.008

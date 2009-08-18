@@ -1,4 +1,3 @@
-.gitignore
 Changes
 examples/MyApp-Web/Changes
 examples/MyApp-Web/lib/MyApp/Web.pm
@@ -60,6 +59,7 @@ META.yml
 README
 t/010_application.t
 t/020_controller_roles.t
+t/022_parameterized_roles.t
 t/030_controllers.t
 t/050_controller_composition.t
 t/051_modifier_signatures.t
@@ -74,16 +74,17 @@ t/lib/TestApp/Controller/Errors.pm
 t/lib/TestApp/Controller/Foo.pm
 t/lib/TestApp/Controller/ModelTest.pm
 t/lib/TestApp/Controller/ModifierSignatures.pm
+t/lib/TestApp/Controller/Parameterized.pm
 t/lib/TestApp/Controller/Root.pm
 t/lib/TestApp/Controller/SubclassingErrors.pm
 t/lib/TestApp/Controller/TestController.pm
 t/lib/TestApp/Controller/ViewTest.pm
 t/lib/TestApp/ControllerRole/ModifierSignatures.pm
+t/lib/TestApp/ControllerRole/Parameterized.pm
 t/lib/TestApp/Model/TestModel.pm
 t/lib/TestApp/TestRole.pm
 t/lib/TestApp/Types.pm
 t/lib/TestApp/View/TestView.pm
 t/lib/TestApp/ViewRole/TestRole.pm
-Todo
 xt/kwalitee.t
 xt/pod.t
