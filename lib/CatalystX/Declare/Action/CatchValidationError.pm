@@ -2,40 +2,33 @@ use MooseX::Declare;
 
 role CatalystX::Declare::Action::CatchValidationError {
 
-    use TryCatch;
+    use aliased 'Moose::Meta::TypeConstraint';
 
-    around execute (Object $controller, Object $ctx, @rest) {
+    has method_type_constraint => (
+        is          => 'rw',
+        isa         => TypeConstraint,
+        handles     => {
+            _check_action_arguments => 'check',
+        },
+    );
 
-        my $tc = $controller->meta->find_method_type_constraint($self->name)
-              || do {
-                   my $method = $controller->meta->find_method_by_name($self->name);
-                   ( $_ = $method->can('type_constraint') )
-                     ? $method->$_
-                     : undef
-                 };
+    has controller_instance => (
+        is          => 'rw',
+        isa         => 'Catalyst::Controller',
+        weak_ref    => 1,
+    );
 
-        if ($tc and my $error = $tc->validate([$controller, $ctx, @rest])) {
+    around match (Object $ctx) {
 
-            if ($ctx->debug) {
-                $ctx->error("BAD REQUEST: $error");
-            }
-            else {
-                $ctx->response->body( 'Not found' );
-                $ctx->response->status( 404 );
-            }
-            
-            $ctx->detach;
-        }
+        return 
+            unless $self->$orig($ctx);
+        return 1 
+            unless $self->method_type_constraint;
 
-        try {
-            $self->$orig($controller, $ctx, @rest);
-        }
-        catch (Any $error) {
+        my @args    = ($self->controller_instance, $ctx, @{ $ctx->req->args });
+        my $tc      = $self->method_type_constraint;
+        my $ret     = $self->_check_action_arguments(\@args);
 
-            $ctx->error($error);
-            $ctx->detach;
-        }
-
-        return 1;
+        return $ret;
     }
 }

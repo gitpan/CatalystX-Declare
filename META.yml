@@ -7,7 +7,7 @@ build_requires:
   ExtUtils::MakeMaker: 6.42
   FindBin: 0
   Test::More: 0.92
-  Test::Output: 0.12
+  Test::Output: 0.16
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
@@ -26,7 +26,7 @@ no_index:
 provides:
   CatalystX::Declare:
     file: lib/CatalystX/Declare.pm
-    version: 0.008
+    version: 0.009
   CatalystX::Declare::Keyword::Action:
     file: lib/CatalystX/Declare/Keyword/Action.pm
   CatalystX::Declare::Keyword::Application:
@@ -50,17 +50,16 @@ requires:
   Devel::Declare: 0.005011
   FindBin: 0
   Moose: 0.89
-  MooseX::AttributeHelpers: 0.16
-  MooseX::Declare: 0.26
-  MooseX::Method::Signatures: 0.20
+  MooseX::AttributeHelpers: 0.21
+  MooseX::Declare: 0.27
+  MooseX::Method::Signatures: 0.21
   MooseX::MethodAttributes: 0.15
   MooseX::Types: 0.17
   Perl6::Junction: 1.40000
-  TryCatch: 1.001001
-  aliased: 0.22
+  aliased: 0.30
   parent: 0.221
 resources:
   bugtracker: http://github.com/phaylon/catalystx-declarative/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/phaylon/catalystx-declarative/tree/master
-version: 0.008
+version: 0.009
