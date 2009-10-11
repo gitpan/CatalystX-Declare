@@ -67,6 +67,13 @@ CatalystX::Declare::Keyword::Role - Declare Catalyst Controller Roles
         around bar_action (Object $ctx) { ... }
     }
 
+    controller_role MyApp::Web::ControllerRole::WithParam (Str :$msg!) {
+
+        final action message under base {
+            $ctx->stash(message => $msg);
+        }
+    }
+
 =head1 DESCRIPTION
 
 This handler provides the C<controller_role> keyword. It is an extension of the
@@ -75,6 +82,39 @@ controllers, the C<method> keyword and the modifiers are provided. For details
 on the syntax for action declarations have a look at
 L<CatalystX::Declare::Keyword::Action>, which also documents the effects of
 method modifiers on actions.
+
+=head2 Parameters
+
+You can use a parameter signature containing named parameters for a role. To
+apply the controller role in the L</SYNOPSIS>, you'd use code like this:
+
+    controller MyApp::Web::Controller::Hello {
+        with 'MyApp::Web::ControllerRole::WithParam' => { msg => 'Hello!' };
+
+        action base under '/' as '';
+    }
+
+You can currently only use the parameters in action declarations in the body,
+te name, the C<as> path part and the C<under> base action specification:
+
+    controller_role Foo (Str :$base, Str :$part) {
+
+        action foo under $base as $part { ... }
+    }
+
+You can specify the parameters either as plain scalar variables or as quoted
+strings. The latter is especially useful for more complex path parts:
+
+    action foo under $base as "$pathpart/fnord" { ... }
+
+To use it in the action name is rather simple:
+
+    final action $foo { ... }
+
+You might want to use the C<as $foo> option to specify a path part instead, 
+though. Use the dynamic action name possibility only if you are really 
+concerned with the name of the generated method, not only the path the 
+action is reachable under.
 
 =head1 SUPERCLASSES
 

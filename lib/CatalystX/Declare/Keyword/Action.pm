@@ -1,8 +1,7 @@
 use MooseX::Declare;
 use MooseX::Role::Parameterized ();
 
-class CatalystX::Declare::Keyword::Action
-    with MooseX::Declare::Syntax::KeywordHandling {
+class CatalystX::Declare::Keyword::Action {
 
 
     use Carp                qw( croak );
@@ -19,6 +18,7 @@ class CatalystX::Declare::Keyword::Action
     use constant UNDER_STACK    => '@CatalystX::Declare::SCOPE::UNDER_STACK';
 
     use aliased 'CatalystX::Declare::Action::CatchValidationError';
+    use aliased 'CatalystX::Declare::Context::StringParsing';
     use aliased 'MooseX::Method::Signatures::Meta::Method';
     use aliased 'MooseX::MethodAttributes::Role::Meta::Method', 'AttributeRole';
     use aliased 'MooseX::MethodAttributes::Role::Meta::Role',   'AttributeMetaRole';
@@ -80,6 +80,10 @@ class CatalystX::Declare::Keyword::Action
 
         my $name   = $attributes{Subname};
 
+        if ($attributes{Private}) {
+            $attributes{Signature} ||= '@';
+        }
+
         my $method = Method->wrap(
             signature       => qq{($attributes{Signature})},
             package_name    => $ctx->get_curstash_name,
@@ -96,7 +100,7 @@ class CatalystX::Declare::Keyword::Action
             for @populators;
 
         unless ($attributes{Private}) {
-            $attributes{PathPart} ||= "'$name'";
+            $attributes{PathPart} ||= $name;
 
             delete $attributes{CaptureArgs}
                 if exists $attributes{Args};
@@ -111,9 +115,15 @@ class CatalystX::Declare::Keyword::Action
                 for qw( Args CaptureArgs Chained Signature Private );
         }
 
+        # inject a hashref for resolving runtime attribute values
+        $self->_inject_attributes($ctx, \%attributes);
+
+        # our declaration is followed by a block
         if ($ctx->peek_next_char eq '{') {
             $ctx->inject_if_block($ctx->scope_injector_call . $method->injectable_code);
         }
+
+        # there is no block, so we insert one.
         else {
             $ctx->inject_code_parts_here(
                 sprintf '{ %s%s }',
@@ -122,24 +132,66 @@ class CatalystX::Declare::Keyword::Action
             );
         }
 
-        my @attributes;
-        for my $attr (keys %attributes) {
-            push @attributes, 
-                map { sprintf '%s%s', $attr, defined($_) ? sprintf('(%s)', $_) : '' }
-                    (ref($attributes{ $attr }) eq 'ARRAY') 
-                    ? @{ $attributes{ $attr } }
-                    : $attributes{ $attr };
-        }
+        my $compile_attrs = sub {
+            my $attributes = shift;;
+            my @attributes;
 
-        return $ctx->shadow(sub (&) {
+            for my $attr (keys %$attributes) {
+                my $value = $attributes->{ $attr };
+
+                # the compiletime chained attr might contain the under global var name
+                next if $attr eq 'Chained' and $value eq UNDER_VAR;
+
+                push @attributes, 
+                    map { sprintf '%s%s', $attr, defined($_) ? sprintf('(%s)', $_) : '' }
+                        (ref($value) eq 'ARRAY') 
+                        ? @$value
+                        : $value;
+            }
+
+            return \@attributes;
+        };
+
+        return $ctx->shadow(sub {
             my $class = caller;
+            my $attrs = shift;
             my $body  = shift;
+
+            # the runtime-resolved name
+            my $name  = $attrs->{Subname};
+
+            # in case no hashref was specified
+            $body = $attrs and $attrs = {}
+                if ref $attrs eq 'CODE';
+
+            # default path part to runtime-resolved name
+            unless ($attrs->{Private}) {
+
+                $attrs->{PathPart} = $attrs->{Subname}
+                    unless defined $attrs->{PathPart};
+            }
+
+            # in CXD we are explicit about chained values, an undefined
+            # value means we defaulted to the outer-scope under and there
+            # was none.
+            delete $attrs->{Chained}
+                unless defined $attrs->{Chained};
+
+            # some attrs need to be single quoted in their stringified forms
+            defined($attrs->{ $_ }) and $attrs->{ $_ } = sprintf "'%s'", $attrs->{ $_ }
+                for qw( Chained PathPart );
+
+            # merge runtime and compiletime attrs
+            my %full_attrs = (%attributes, %$attrs);
+            my $compiled_attrs = $compile_attrs->(\%full_attrs);
 
             my $real_method = $method->reify(
                 actual_body => $body,
-                attributes  => \@attributes,
+                attributes  => $compiled_attrs,
+                name        => $name,
             );
 
+            # NYI
             if ($modifier) {
 
                 add_method_modifier $class, $modifier, [$name, $real_method];
@@ -150,7 +202,7 @@ class CatalystX::Declare::Keyword::Action
                     my ($meta) = @_;
 
                     $meta->add_method($name, $real_method);
-                    $meta->register_method_attributes($meta->name->can($real_method->name), \@attributes);
+                    $meta->register_method_attributes($meta->name->can($real_method->name), $compiled_attrs);
                 };
 
                 if ($ctx->stack->[-1] and $ctx->stack->[-1]->is_parameterized) {
@@ -163,8 +215,10 @@ class CatalystX::Declare::Keyword::Action
 
                     $real_meta->$prepare_meta;
                 }
+                else {
 
-                $class->meta->$prepare_meta;
+                    $class->meta->$prepare_meta;
+                }
             }
         });
     }
@@ -210,12 +264,13 @@ class CatalystX::Declare::Keyword::Action
     method _handle_action_option (Object $ctx, HashRef $attrs) {
 
         # action name
-        my $name = $ctx->strip_name
+        my $name = $self->_strip_actionpath($ctx, interpolate => 1)
             or croak "Anonymous actions not yet supported";
 
         $ctx->skipspace;
         my $populator;
 
+        # shortcut under base option is basically handled by the under handler
         if (substr($ctx->get_linestr, $ctx->offset, 2) eq '<-') {
             my $linestr = $ctx->get_linestr;
             substr($linestr, $ctx->offset, 2) = '';
@@ -233,9 +288,8 @@ class CatalystX::Declare::Keyword::Action
 
         push @{ $attrs->{CatalystX_Declarative_ActionRoles} ||= [] }, CatchValidationError;
 
-        if (defined $CatalystX::Declare::SCOPE::UNDER) {
-            $attrs->{Chained} ||= $CatalystX::Declare::SCOPE::UNDER;
-        }
+        # default chained base to the global under var, to be resolved at runtime
+        $attrs->{Chained} ||= UNDER_VAR;
 
         return unless $populator;
         return $populator;
@@ -256,6 +310,9 @@ class CatalystX::Declare::Keyword::Action
 
     method _build_flag_populator (Object $ctx, HashRef $attrs, Str $what) {
 
+        $attrs->{Private} = []
+            if $what eq 'private';
+
         return sub {
             my $method = shift;
 
@@ -270,26 +327,20 @@ class CatalystX::Declare::Keyword::Action
 
     method _handle_under_option (Object $ctx, HashRef $attrs) {
 
-        my $target = $self->_strip_actionpath($ctx);
+        my $target = $self->_strip_actionpath($ctx, interpolate => 1);
         $ctx->skipspace;
 
         if ($ctx->peek_next_char eq '{' and $self->identifier eq 'under') {
             $ctx->inject_if_block(
-                sprintf '%s; BEGIN { push %s, %s; %s = qq(%s) };',
-                    $ctx->scope_injector_call(
-                        sprintf ';BEGIN { %s = pop %s };', 
-                            UNDER_VAR,
-                            UNDER_STACK,
-                    ),
-                    UNDER_STACK,
-                    UNDER_VAR,
+                $ctx->scope_injector_call .
+                sprintf ';local %s = %s;',
                     UNDER_VAR,
                     $target,
             );
             return STOP_PARSING;
         }
 
-        $attrs->{Chained} = "'$target'";
+        $attrs->{Chained} = $target;
 
         return sub {
             my $method = shift;
@@ -309,8 +360,8 @@ class CatalystX::Declare::Keyword::Action
 
         $ctx->skipspace;
 
-        my $path = $self->_strip_actionpath($ctx);
-        $attrs->{PathPart} = "'$path'";
+        my $path = $self->_strip_actionpath($ctx, interpolate => 1);
+        $attrs->{PathPart} = $path;
 
         return;
     }
@@ -331,26 +382,61 @@ class CatalystX::Declare::Keyword::Action
         return 0;
     }
 
-    method _strip_actionpath (Object $ctx) {
+    method _inject_attributes (Object $ctx, HashRef $attrs) {
+
+        # attrs that need to be runtime-resolved
+        my @inject = qw( Chained PathPart Subname );
+
+        # turn specific attributes into a hashref
+        my $code = sprintf ' +{ %s }, sub ',        # the ', sub ' turns method +{ ... } { ... } into 
+            join ', ',                              #   method +{ ... }, sub { ... }
+            map  { (@$_) }
+            map  { defined( $_->[1] ) ? $_ : [$_->[0], 'undef'] }
+            map  { [pp($_), $attrs->{ $_ }] }
+            grep { defined $attrs->{ $_ } }
+            @inject;
+
+        # inject the hashref code before the action body
+        $ctx->inject_code_parts_here($code);
+        $ctx->inc_offset(length $code);
+    }
+
+    method _strip_actionpath (Object $ctx, :$interpolate?) {
 
         $ctx->skipspace;
         my $linestr = $ctx->get_linestr;
         my $rest    = substr($linestr, $ctx->offset);
+        my $interp  = sub { $interpolate ? "'$_[0]'" : $_[0] };
 
+        # find simple barewords
         if ($rest =~ /^ ( [_a-z] [_a-z0-9]* ) \b/ix) {
             substr($linestr, $ctx->offset, length($1)) = '';
             $ctx->set_linestr($linestr);
-            return $1;
+            return $interp->($1);
         }
+
+        # allow single quoted more complex barewords
         elsif ($rest =~ /^ ' ( (?:[.:;,_a-z0-9]|\/)* ) ' /ix) {
             substr($linestr, $ctx->offset, length($1) + 2) = '';
             $ctx->set_linestr($linestr);
-            return $1;
+            return $interp->($1);
         }
+
+        # double quoted strings and variables
+        elsif ($interpolate and my $str = $ctx->get_string) {
+            return $str;
+        }
+
+        # not suitable as action path
         else {
             croak "Invalid syntax for action path: $rest";
         }
     }
+    
+    # down here because it requires the parse method
+    with 'MooseX::Declare::Syntax::KeywordHandling';
+
+    around context_traits { $self->$orig, StringParsing }
 }
 
 __END__
@@ -656,6 +742,14 @@ what class to use:
 
 The loaded class will be L<Moose>ified, so we are able to apply essential
 roles.
+
+=head2 Private Actions
+
+B<This option is a bit less, but still pretty experimental>
+
+You can declare private actions with the C<is private> trait:
+
+    action end is private isa RenderView;
 
 =head1 ROLES
 

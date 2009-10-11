@@ -42,6 +42,7 @@ inc/Module/Install/WriteAll.pm
 lib/CatalystX/Declare.pm
 lib/CatalystX/Declare/Action/CatchValidationError.pm
 lib/CatalystX/Declare/Context/AppSetup.pm
+lib/CatalystX/Declare/Context/StringParsing.pm
 lib/CatalystX/Declare/Controller/ActionPreparation.pm
 lib/CatalystX/Declare/Controller/DetermineActionClass.pm
 lib/CatalystX/Declare/Controller/Meta/TypeConstraintMapping.pm
@@ -63,6 +64,7 @@ t/010_application.t
 t/011_plain_application.t
 t/020_controller_roles.t
 t/022_parameterized_roles.t
+t/023_runtime_dynamics.t
 t/030_controllers.t
 t/050_controller_composition.t
 t/051_modifier_signatures.t
@@ -77,10 +79,13 @@ t/lib/Catalyst/Plugin/CatalystX/Declare/TestPlugin.pm
 t/lib/PlainTestApp.pm
 t/lib/PlainTestApp/Controller/Root.pm
 t/lib/RenderViewTestApp.pm
+t/lib/RenderViewTestApp/Action/RenderView.pm
 t/lib/RenderViewTestApp/Controller/Root.pm
 t/lib/RenderViewTestApp/View/Test.pm
 t/lib/TestApp.pm
 t/lib/TestApp/Controller/Composed.pm
+t/lib/TestApp/Controller/DynamicFinal/Bar.pm
+t/lib/TestApp/Controller/DynamicFinal/Foo.pm
 t/lib/TestApp/Controller/Errors.pm
 t/lib/TestApp/Controller/Foo.pm
 t/lib/TestApp/Controller/ModelTest.pm
@@ -92,6 +97,7 @@ t/lib/TestApp/Controller/SubclassingErrors.pm
 t/lib/TestApp/Controller/TestController.pm
 t/lib/TestApp/Controller/UnderSequence.pm
 t/lib/TestApp/Controller/ViewTest.pm
+t/lib/TestApp/ControllerRole/DynamicFinal.pm
 t/lib/TestApp/ControllerRole/ModifierSignatures.pm
 t/lib/TestApp/ControllerRole/Parameterized.pm
 t/lib/TestApp/Model/TestModel.pm
