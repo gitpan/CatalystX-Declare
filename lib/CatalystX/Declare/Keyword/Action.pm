@@ -225,15 +225,29 @@ class CatalystX::Declare::Keyword::Action {
 
     method _handle_with_option (Object $ctx, HashRef $attrs) {
 
-        my $role = $ctx->strip_name
-            or croak "Expected bareword role specification for action after with";
+        my @roles_with_args = ();
+        push @roles_with_args, @{ $ctx->strip_names_and_args };
 
         # we need to fish for aliases here since we are still unclean
-        if (defined(my $alias = $self->_check_for_available_import($ctx, $role))) {
-            $role = $alias;
+        my @roles = ();
+        for my $role_with_arg(@roles_with_args) {
+            my ($role, $params) = @{$role_with_arg};
+            if($params) {
+                my ($first, @rest) = eval $params;
+                my %params = ref $first eq 'HASH' ? %$first : ($first, @rest); # both (%opts) and {%opts}
+                for my $key (keys %params) {
+                    my $parameters = ref $params{$key} eq 'ARRAY' ? @{$params{$key}} : $params{$key};
+                    push @{$attrs->{$key}}, $parameters;
+                }
+            }          
+
+            if (defined(my $alias = $self->_check_for_available_import($ctx, $role))) {
+                $role = $alias;
+            }
+            push @roles, $role;
         }
 
-        push @{ $attrs->{CatalystX_Declarative_ActionRoles} ||= [] }, $role;
+        push @{ $attrs->{CatalystX_Declarative_ActionRoles} ||= [] }, @roles;
 
         return;
     }
@@ -727,6 +741,75 @@ consume the C<RichBase> role declared above:
             );
         }
     }
+
+You can consume multiple action roles similarly to the way you do with the
+class or role keyword:
+
+    action user
+    with LoggedIn
+    with isSuperUser {}
+
+Or
+
+    action User
+    with (LoggedIn, isSuperUser) {}
+
+Lastly, you can pass parameters to the underlying L<Catalyst::Action> using
+a syntax that is similar to method traits:
+
+    action myaction with hasRole(opt1=>'val1', opt2=>'val2')
+
+Where C<%opts> is a hash that is used to populate $action->attributes in the
+same way you might have done the following in classic L<Catalyst>
+
+    sub myaction :Action :Does(hasRole) :opt1(val1) :opt2(val2)
+
+Here's a more detailed example:
+
+    action User
+    with hasLogger(log_engine=>'STDOUT')
+    with hasPermissions(
+        role=>['Administrator', 'Member'],
+    ) {}
+
+Think of these are classic catalyst subroutine attributes on steriods.  Unlike
+subroutine attributes, you can split and format your code across multiple lines
+and you can use deep and complex data structures such as HashRefs or ArrayRefs.
+Also, since the parameters are grouped syntactically within the C<with> keyword
+this should improve readability of your code, since it will be more clear which
+parameters belong to with roles.  This should give L<CatalystX::Declare> greater
+compatibility with legacy L<Catalyst> code but offer us a way forward from 
+needing subroutine attributes, which suffer from significant drawbacks.
+
+A few caveats and differences from method traits.  First of all, unlike method
+traits, parameters are not passed to the L<Catalyst::Action> constructor, but 
+instead used to populate the C<attributes> attribute, which is to preserve
+compatibility with how subroutine attributes work in classic L<Catalyst>.
+
+Additionally, since subroutines attributes supported a very limited syntax for
+supplying values, we follow the convention where parameter values are pushed 
+onto an arrayref.  In other words the following:
+
+    action User with hasLogger(engine=>'STDOUT')
+
+would create the following data structure:
+
+    $action->attributes->{engine} = ['STDOUT']
+
+The one exception is that if the value is an arrayref, those will be merged:
+
+    action User with Permissions(roles=>[qw/admin member/]) {}
+    ## Creates: $action->attributes->{roles} = ['admin','member']
+
+My feeling is that this gives better backward compatibility with classic sub
+attributes:
+
+    sub User :Action :Does(Permissions) :roles(admin) :roles(member)
+
+However, I realize this method could lead to namespace collisions within the
+C<$action->attributes> attribute.  For now this is an avoidable issue.  In the
+future we may add a C<$action->trait_attributes> or similar attribute to the
+L<Catalyst::Action> class in order to resolve this issue.
 
 =head2 Action Classes
 

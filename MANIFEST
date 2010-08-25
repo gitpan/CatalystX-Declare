@@ -83,6 +83,7 @@ t/lib/RenderViewTestApp/Action/RenderView.pm
 t/lib/RenderViewTestApp/Controller/Root.pm
 t/lib/RenderViewTestApp/View/Test.pm
 t/lib/TestApp.pm
+t/lib/TestApp/Controller/ActionParams.pm
 t/lib/TestApp/Controller/Composed.pm
 t/lib/TestApp/Controller/DynamicFinal/Bar.pm
 t/lib/TestApp/Controller/DynamicFinal/Foo.pm
