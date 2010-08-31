@@ -75,6 +75,7 @@ t/080_models.t
 t/100_complex.t
 t/110_under_sequence.t
 t/510_render_view.t
+t/lib/Catalyst/ActionRole/hasActionParams_CatNS.pm
 t/lib/Catalyst/Plugin/CatalystX/Declare/TestPlugin.pm
 t/lib/PlainTestApp.pm
 t/lib/PlainTestApp/Controller/Root.pm
@@ -83,6 +84,7 @@ t/lib/RenderViewTestApp/Action/RenderView.pm
 t/lib/RenderViewTestApp/Controller/Root.pm
 t/lib/RenderViewTestApp/View/Test.pm
 t/lib/TestApp.pm
+t/lib/TestApp/ActionRole/hasActionParams_AppNS.pm
 t/lib/TestApp/Controller/ActionParams.pm
 t/lib/TestApp/Controller/Composed.pm
 t/lib/TestApp/Controller/DynamicFinal/Bar.pm
