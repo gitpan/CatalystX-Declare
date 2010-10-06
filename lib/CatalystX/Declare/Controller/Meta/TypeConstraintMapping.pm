@@ -1,5 +1,4 @@
 use MooseX::Declare;
-use MooseX::AttributeHelpers;
 
 role CatalystX::Declare::Controller::Meta::TypeConstraintMapping {
 
@@ -9,38 +8,38 @@ role CatalystX::Declare::Controller::Meta::TypeConstraintMapping {
     use aliased 'MooseX::Method::Signatures::Meta::Method', 'MethodWithSignature';
 
     has method_type_constraint_map => (
-        metaclass   => 'Collection::Hash',
+        traits    => [ 'Hash' ],
         is          => 'ro',
         isa         => HashRef[Object],
         required    => 1,
         lazy_build  => 1,
-        provides    => {
-            get         => 'get_method_type_constraint',
-            set         => 'set_method_type_constraint',
+        handles    => {
+            'get_method_type_constraint' => 'get',
+            'set_method_type_constraint' => 'set',
         },
     );
 
     has method_named_param_map => (
-        metaclass   => 'Collection::Hash',
+        traits    => [ 'Hash' ],
         is          => 'ro',
         isa         => HashRef[ArrayRef[Str]],
         required    => 1,
         lazy_build  => 1,
-        provides    => {
-            get         => 'get_method_named_params',
-            set         => 'set_method_named_params',
+        handles    => {
+            'get_method_named_params' => 'get',
+            'set_method_named_params' => 'set',
         },
     );
 
     has method_named_type_constraint_map => (
-        metaclass   => 'Collection::Hash',
+        traits    => [ 'Hash' ],
         is          => 'ro',
         isa         => HashRef[HashRef[Object]],
         required    => 1,
         lazy_build  => 1,
-        provides    => {
-            get         => 'get_method_named_type_constraint',
-            set         => 'set_method_named_type_constraint',
+        handles    => {
+            'get_method_named_type_constraint' => 'get',
+            'set_method_named_type_constraint' => 'set',
         },
     );
 
